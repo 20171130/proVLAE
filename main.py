@@ -15,6 +15,7 @@ import copy
 from metric_MIG import *
 from shutil import copyfile
 import glob
+from tqdm import trange
 
 tf.app.flags.DEFINE_integer("epoch_size", 15, "epoch size")
 tf.app.flags.DEFINE_integer("batch_size", 100, "batch size")
@@ -26,7 +27,7 @@ tf.app.flags.DEFINE_integer("train_seq",3,"training sequence number")
 tf.app.flags.DEFINE_boolean("KL", False, "pre-trained KL loss or not")
 tf.app.flags.DEFINE_boolean("fadein", False, "fadein new blocks or not")
 tf.app.flags.DEFINE_float("coff", .5, "coff for pre-trained KL loss")
-tf.app.flags.DEFINE_float("gpu_usage", 1., "TF GPU usage fraction")
+tf.app.flags.DEFINE_float("gpu_usage", 0.9, "TF GPU usage fraction")
 tf.app.flags.DEFINE_integer("z_dim", 3, "dimensions for each latent variable")
 tf.app.flags.DEFINE_integer("mode", 1, "mode. 1: training one step; 2: display results; 3: compute metrics")
 flags = tf.app.flags.FLAGS
@@ -66,7 +67,7 @@ def train(sess,model,manager,saver):
     
     total_batch = n_samples // flags.batch_size
     
-    for i in range(total_batch):
+    for i in trange(total_batch):
       batch_indices = indices[flags.batch_size*i : flags.batch_size*(i+1)]
       batch_xs = manager.get_images(batch_indices)
 
@@ -272,11 +273,13 @@ def main(argv):
     print('set to default dataset: dsprite')
     manager = DataManager()
 
+
   if flags.mode==3:
     gpu_options = tf.GPUOptions(allow_growth=True)
   else:
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=flags.gpu_usage)
   sess = tf.Session(config=tf.ConfigProto(log_device_placement=False,gpu_options=gpu_options))
+  print("before creating model")
   model = VAE_ladder(z_dim=z_dim,beta=flags.beta,
               learning_rate=flags.learning_rate,flags=flags,chn_num=chn_num,train_seq=flags.train_seq,)
 

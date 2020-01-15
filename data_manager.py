@@ -35,8 +35,9 @@ class DataManager(object):
 
 class DataManager_Celeb64(object):
   def load(self):
-    self.img_folder = "data/celebA" #"path/to/celebA"
-    self.all_path_list = glob.glob(os.path.join(self.img_folder,"*.png"))
+    self.img_folder = "/home/wuruihai/WMD/data/celebA/celebA/" #"path/to/celebA"
+    tmp = os.path.join(self.img_folder,"*.jpg")
+    self.all_path_list = glob.glob(tmp)
     self.imgs = None
     self.n_samples = len(self.all_path_list)
   @property
@@ -44,7 +45,7 @@ class DataManager_Celeb64(object):
     return self.n_samples
 
   def get_image(self, index=0):
-    image_name = self.img_folder+'/{:06d}.png'.format(index + 1)
+    image_name = self.img_folder+'/{:06d}.jpg'.format(index + 1)
     image = Image.open(image_name).crop((15, 45, 163, 193)).resize((64,64),Image.ANTIALIAS) #crop and resize
     return np.array(image)
 
